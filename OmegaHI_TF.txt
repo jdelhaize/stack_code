@@ -1,0 +1,51 @@
+#!/usr/bin/env python
+
+from numpy import *
+from scipy import *
+from scipy import integrate
+from pylab import *
+ion() # turns interactive mode on
+import pickle
+import time
+
+rcParams['text.usetex']='True'
+rcParams['font.sans-serif']= "Helvetica"
+rcParams['axes.labelsize']=17
+rcParams['font.size']=14
+	
+from utils import *
+from constants import *
+from OmegaHI_vars import *
+from OmegaHI_control import *
+#from OmegaHI_sourceselect import *
+
+
+# Calculate the inclination of the galaxies from their axes ratios, and plot the distribution of i
+inclin=find_incl(semimajor, semiminor)
+print shape(inclin)
+figure()
+hist(inclin[2::]*180/pi,bins=20)
+ylabel(r'$\rm{Count}$')
+xlabel(r'$i\ (\rm{degrees})$')
+
+# Calculate the rotational velocities using a Tully-Fisher relation, and plot the relation
+tf_offset=-1.409604
+tf_slope=-8.586856
+rotvel = TF_vel( absmag_uncorr, tf_offset, tf_slope )
+figure()
+plot(rotvel,absmag_uncorr,'ko')
+xscale('log')
+ylim(-16,-23)
+grid()
+xlabel(r'$\rm{Rotational\ Velocity\ (km/s)}$')
+ylabel(r'$\rm{Absolute\ Magnitude\ (mag)}$')
+
+# Calculate the estimated HI linewidth from the rotational velocities and plot the distbn.
+linewidth = rotvel_to_W(rotvel, inclin)
+figure()
+hist(linewidth[2::],bins=20)
+xlabel(r'$\rm{Line\ width\ (km/s)}$')
+ylabel(r'$\rm{Count}$')
+
+print shape(linewidth)
+print min(linewidth[2::]), max(linewidth[2::])
